@@ -1,0 +1,5 @@
+pyeditorconfig/__pycache__/
+.DS_Store
+pyeditorconfig/.DS_Store
+pyeditorconfig.egg-info/
+.ruff_cache/
