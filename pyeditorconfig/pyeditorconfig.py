@@ -107,7 +107,7 @@ def parse_file(path: Path) -> tuple[list[Section], bool]:
         # whitespace should be ignored, but configparser uses it to do
         # multiline values by default
         empty_lines_in_values=False,
-        # allow duplicate sections #444 https://stackoverflow.com/a/9888814
+        # allow duplicate sections https://github.com/Akuli/porcupine/issues/444
         strict=False,
     )
 

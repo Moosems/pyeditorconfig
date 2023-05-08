@@ -3,3 +3,6 @@ pyeditorconfig/__pycache__/
 pyeditorconfig/.DS_Store
 pyeditorconfig.egg-info/
 .ruff_cache/
+dist/
+.pytest_cache/
+tests/__pycache__
