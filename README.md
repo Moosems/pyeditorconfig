@@ -29,7 +29,7 @@ Given a .editorconfig file as a dict (from `get_config()`), these methods will r
 | --- | --- | --- |
 | `config` | `dict` | The configuration file as a dict. |
 
-## `glob_match()`, `parse_file(), `get_bool()`
+## `glob_match()`, `parse_file()`, `get_bool()`
 
 These methods are used internally to match the globs in the configuration file and convert the strings in the configuration file to booleans.
 

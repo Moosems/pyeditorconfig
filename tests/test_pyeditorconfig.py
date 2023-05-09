@@ -2,7 +2,7 @@ from sys import path as sys_path
 
 sys_path.insert(0, "../pyeditorconfig")
 
-from pyeditorconfig import get_config # noqa: E402
+from pyeditorconfig import get_config  # noqa: E402
 
 
 def test_get_config() -> None:
