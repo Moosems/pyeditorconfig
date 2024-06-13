@@ -1,66 +1,17 @@
 """Editorconfig support: https://editorconfig.org/"""
-# The original editorconfig package doesn't even support *.{py,js}:
-#
-#    https://pypi.org/project/EditorConfig/
-#
-# Many comments in this file are quotes from https://editorconfig.org/
 from __future__ import annotations
 
 import dataclasses
 from configparser import ConfigParser
 from configparser import Error as CPError
 from enum import Enum
-from logging import getLogger
 from pathlib import Path
 from re import compile, escape, fullmatch
 from re import match as re_match
 
 setup_after = ["filetypes"]
-log = getLogger(__name__)
-
 
 class LineEnding(Enum):
-    r"""
-    This :mod:`enum` has these members representing different ways to write
-    newline characters to files:
-
-    .. data:: CR
-
-        ``\r``, aka "Mac line endings".
-
-    .. data:: LF
-
-        ``\n``, aka "Linux/Unix line endings".
-
-    .. data:: CRLF
-
-        ``\r\n``, aka "Windows line endings".
-
-    Python's :func:`open` function translates all of these to the string
-    ``'\n'`` when reading files and uses a platform-specific default when
-    writing files.
-
-    There are 3 ways to represent line endings in Porcupine, and
-    different things want the line ending represented in different ways:
-
-        * The strings ``'\r'``, ``'\n'`` and ``'\r\n'``. For example,
-          :func:`open` line endings are specified like this.
-        * The strings ``'CR'``, ``'LF'`` and ``'CRLF'``. Line endings are
-          typically defined this way in configuration files, such as
-          `editorconfig <https://editorconfig.org/>`_ files.
-        * This enum. Reccomended for avoiding typos
-          For example, ``LineEnding[some_string_from_user]`` (see below)
-          raises an error if the string is invalid.
-
-    Convert between this enum and the different kinds of strings like this:
-
-        * Enum to backslashy string: ``LineEnding.CRLF.value == '\r\n'``
-        * Enum to human readable string: ``LineEnding.CRLF.name == 'CRLF'``
-        * Backslashy string to enum: ``LineEnding('\r\n') == LineEnding.CRLF``
-        * Human readable string to enum: ``LineEnding['CRLF'] == LineEnding.CRLF``
-
-    Use ``LineEnding(os.linesep)`` to get the platform-specific default.
-    """
     CR = "\r"
     LF = "\n"
     CRLF = "\r\n"
@@ -85,8 +36,6 @@ class Section:
 # Sections later in resulting list override earlier sections: "EditorConfig
 # files are read top to bottom and the most recent rules found take precedence."
 def parse_file(path: Path) -> tuple[list[Section], bool]:
-    log.debug(f"parsing {path}")
-
     # "EditorConfig files should be UTF-8 encoded, with either CRLF or LF line
     # separators."
     #
@@ -107,7 +56,7 @@ def parse_file(path: Path) -> tuple[list[Section], bool]:
         # whitespace should be ignored, but configparser uses it to do
         # multiline values by default
         empty_lines_in_values=False,
-        # allow duplicate sections https://github.com/Akuli/porcupine/issues/444
+        # allow duplicate sections
         strict=False,
     )
 
@@ -117,7 +66,7 @@ def parse_file(path: Path) -> tuple[list[Section], bool]:
     try:
         parser.read_string(content, source=str(path))
     except CPError:
-        log.exception(f"error while parsing {path}")
+        pass
         # it may be partially parsed, let's continue as if no error happened
 
     # "EditorConfig files are read top to bottom and the most recent rules
@@ -144,10 +93,6 @@ def parse_file(path: Path) -> tuple[list[Section], bool]:
     try:
         is_root = {"true": True, "false": False}[root_string.lower()]
     except KeyError:
-        log.error(
-            "'root' should be set to 'true' or 'false' (case insensitive), "
-            f"but it was set to {root_string!r}"
-        )
         is_root = False
     return (result, is_root)
 
@@ -277,7 +222,6 @@ def get_config(path: Path) -> dict[str, str]:
             if not glob_match(glob, relative):
                 continue
         except Exception:
-            log.exception(f"error while globbing {section.path_glob}")
             continue
 
         for name, value in section.config.items():
@@ -299,7 +243,6 @@ def get_bool(
             return True
         if config[option] == false_string:
             return False
-        log.error(f"bad {option}: {config[option]!r}")
     return None
 
 
@@ -318,7 +261,6 @@ def get_indent_size(config: dict[str, str]) -> int | None:
     try:
         return int(string_value)
     except ValueError:
-        log.error(f"bad indent_size or tab_width: {string_value!r}")
         return None
 
 
@@ -331,7 +273,6 @@ def get_encoding(config: dict[str, str]) -> str | None:
             return "utf-8-sig"  # this appears to be the Python name of this encoding
         if encoding in {"latin1", "utf-8", "utf-16be", "utf-16le"}:
             return encoding
-        log.error(f"bad charset: {encoding!r}")
 
     return None
 
@@ -342,7 +283,7 @@ def get_max_line_length(config: dict[str, str]) -> int | None:
         try:
             return int(string)
         except ValueError:
-            log.error(f"bad max_line_length: {string!r}")
+            pass
     return None
 
 
@@ -351,5 +292,4 @@ def get_line_ending(config: dict[str, str]) -> LineEnding | None:
         string = config["end_of_line"]
         if string in {"cr", "lf", "crlf"}:
             return LineEnding[string.upper()]
-        log.error(f"bad end_of_line: {string!r}")
     return None
