@@ -6,7 +6,7 @@ with open("README.md", "r") as file:
 
 setup(
     name="pyeditorconfig",
-    version="0.0.1",
+    version="1.0.0",
     description="A better way to handle .editorconfig files with Python.",
     author="Moosems",
     author_email="moosems.j@gmail.com",
